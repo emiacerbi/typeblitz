@@ -9,7 +9,6 @@ const UserInput: React.FC = () => {
   const [text, setText] = useState('');
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
-  // const [wpm, setWpm] = useState('0');
   const [errors, setErrors] = useState(0);
 
   const paragraph =
