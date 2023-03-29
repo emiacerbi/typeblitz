@@ -10,7 +10,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="min-h-screen bg-neutral-900 text-neutral-100 grid place-content-center">
+      <main className="grid min-h-screen place-content-center bg-neutral-900 text-neutral-100">
         <UserInput />
       </main>
     </>

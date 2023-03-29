@@ -12,39 +12,34 @@ const UserInput: React.FC = () => {
   const [errors, setErrors] = useState(0);
 
   const paragraph =
-    'Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa ipsum inventore harum quisquam, eligendi placeat labore provident officia assumenda eum rem. Quod nihil consequuntur delectus cupiditate ratione autem ad officia!';
-
+    'This is a simple paragraph that is meant to be nice and easy to type which is why there will be mommas no periods or any capital letters';
   const textRef = useRef(text);
   textRef.current = text;
 
   const handleStart = () => {
     setStarted(true);
-
     setTimeout(handleResult, TIMER);
   };
 
   const handleResult = () => {
     setFinished(true);
     setText(textRef.current);
-
-    const typedWords = textRef.current.trim().split(' ');
-    const originalWords = paragraph.trim().split(' ');
-    let errorCount = 0;
-
-    typedWords.forEach((word, i) => {
-      if (word !== originalWords[i]) {
-        errorCount++;
-      }
-    });
-
-    setErrors(errorCount);
   };
 
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    setText(event.target.value);
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setText(value);
   };
+
+  // const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  //   console.log(text);
+  //   // if (event.key === ' ') console.log('space pressed');
+  // };
+
+  const currentTextLetter = text.split('').slice(-1).join('');
 
   const letterCount = text.trim().split(' ').join('').length;
+
   const netWpm = (
     letterCount /
     AVERAGE_WORD_LENGTH /
@@ -53,25 +48,45 @@ const UserInput: React.FC = () => {
 
   return (
     <div className="max-w-lg">
-      <div className="flex flex-col">
-        <p className="text-orange-500 text-center">{paragraph}</p>
+      <div className="">
+        {paragraph.split('').map((letter, idx) => {
+          let letterClass;
+
+          if (letter === currentTextLetter && idx === text.length - 1) {
+            letterClass = 'text-green-500';
+          } else if (letter !== currentTextLetter && idx === text.length - 1) {
+            letterClass = 'text-red-500';
+          } else {
+            letterClass = 'text-neutral-200';
+          }
+
+          return (
+            <span className={letterClass} key={idx}>
+              {letter}
+            </span>
+          );
+        })}
 
         {!started && (
-          <button
-            className="bg-blue-500 p-2 rounded-md mt-10 mx-auto"
-            onClick={handleStart}
-          >
-            Click here to start!
-          </button>
+          <div className="flex">
+            <button
+              className="mx-auto mt-10 rounded-md bg-blue-500 p-2"
+              onClick={handleStart}
+            >
+              Click here to start!
+            </button>
+          </div>
         )}
       </div>
 
       {started && !finished && (
         <div className="mt-10 flex">
-          <textarea
-            className="rounded-md border-4 outline-none p-2 bg-neutral-200 border-orange-500 w-full text-neutral-900"
+          <input
+            className="w-full rounded-md border-4 border-orange-500 bg-neutral-200 p-2 text-neutral-900 outline-none"
             value={text}
             onChange={handleChange}
+            // onKeyDown={handleKeyDown}
+            type="text"
           />
         </div>
       )}
