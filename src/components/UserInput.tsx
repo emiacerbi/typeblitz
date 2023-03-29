@@ -46,6 +46,8 @@ const UserInput: React.FC = () => {
     TIME_IN_MINUTES
   ).toFixed();
 
+  console.log('Pipeline test');
+
   return (
     <div className="max-w-lg">
       <div className="">
