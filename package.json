@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "eslint": "npx eslint ."
+    "eslint": "npx eslint .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@types/node": "18.15.10",
