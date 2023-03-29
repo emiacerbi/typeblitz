@@ -12,7 +12,7 @@ const UserInput: React.FC = () => {
   const [errors, setErrors] = useState(0);
 
   const paragraph =
-    'This is a simple paragraph that is meant to be nice and easy to type which is why there will be mommas no periods or any capital letters';
+    'This is a simple paragraph that is meant to be nice and easy to type which is why there will be commas no periods or any capital letters';
   const textRef = useRef(text);
   textRef.current = text;
 
