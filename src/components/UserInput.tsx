@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 const TIME_IN_SECONDS = 1000;
 const TIMER = 10 * TIME_IN_SECONDS;
@@ -9,12 +9,42 @@ const UserInput: React.FC = () => {
   const [text, setText] = useState('');
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [errors, setErrors] = useState(0);
+  // const [errors, setErrors] = useState(0);
 
-  const paragraph =
-    'This is a simple paragraph that is meant to be nice and easy to type which is why there will be commas no periods or any capital letters';
+  const [greenLetters, setGreenLetters] = useState<number[]>([]);
+  const [redLetters, setRedLetters] = useState<number[]>([]);
+
+  const paragraph = 'This is a simple';
+
+  const splittedParagraph = paragraph.split('');
+  const splittedText = text.split('');
+
+  const splittedParagraphInWords = paragraph.split(' ');
+  const splittedTextInWords = paragraph.split(' ');
+
+  const currentTextLetter = text.split('').slice(-1).join('');
+  const textLetterIndex = splittedText.length - 1;
+
   const textRef = useRef(text);
   textRef.current = text;
+
+  const errors = redLetters.length;
+
+  useEffect(() => {
+    if (splittedParagraph[textLetterIndex] === currentTextLetter) {
+      setGreenLetters([...greenLetters, textLetterIndex]);
+    } else {
+      setGreenLetters(
+        greenLetters.filter((letter) => letter !== textLetterIndex)
+      );
+    }
+
+    if (text && splittedParagraph[textLetterIndex] !== currentTextLetter) {
+      setRedLetters([...redLetters, textLetterIndex]);
+    } else {
+      setRedLetters(redLetters.filter((letter) => letter !== textLetterIndex));
+    }
+  }, [text]);
 
   const handleStart = () => {
     setStarted(true);
@@ -31,13 +61,6 @@ const UserInput: React.FC = () => {
     setText(value);
   };
 
-  // const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-  //   console.log(text);
-  //   // if (event.key === ' ') console.log('space pressed');
-  // };
-
-  const currentTextLetter = text.split('').slice(-1).join('');
-
   const letterCount = text.trim().split(' ').join('').length;
 
   const netWpm = (
@@ -46,24 +69,21 @@ const UserInput: React.FC = () => {
     TIME_IN_MINUTES
   ).toFixed();
 
-  console.log('Pipeline test number two');
+  // console.log(splittedParagraphInWords);
+  // console.log(splittedTextInWords);
 
   return (
     <div className="max-w-lg">
-      <div className="">
-        {paragraph.split('').map((letter, idx) => {
-          let letterClass;
-
-          if (letter === currentTextLetter && idx === text.length - 1) {
-            letterClass = 'text-green-500';
-          } else if (letter !== currentTextLetter && idx === text.length - 1) {
-            letterClass = 'text-red-500';
-          } else {
-            letterClass = 'text-neutral-200';
-          }
+      <div>
+        {splittedParagraph.map((letter, idx) => {
+          let letterStyle = greenLetters.includes(idx)
+            ? 'text-green-400'
+            : redLetters.includes(idx)
+            ? 'text-red-500 bg-red-100'
+            : 'text-neutral-100';
 
           return (
-            <span className={letterClass} key={idx}>
+            <span className={letterStyle} key={idx}>
               {letter}
             </span>
           );
