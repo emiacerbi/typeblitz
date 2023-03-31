@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes blinking {
+  0% {
+    text-decoration: underline;
+  }
+
+  /* 100% {
+    text-decoration: none;
+  } */
+}
+
+.animation {
+  animation: blinking steps(2) 1.5s infinite;
+}
+
+/* .capo {
+  position: relative;
+} */
+
+/* .capo::before {
+  content: '';
+  position: absolute;
+  display: block;
+  width: 50%;
+  height: 3px;
+  background-color: red;
+  z-index: 10;
+} */

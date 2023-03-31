@@ -1,67 +1,45 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 const TIME_IN_SECONDS = 1000;
-const TIMER = 10 * TIME_IN_SECONDS;
+const TIMER = 20 * TIME_IN_SECONDS;
 const TIME_IN_MINUTES = TIMER / 1000 / 60;
 const AVERAGE_WORD_LENGTH = 5;
 
-const UserInput: React.FC = () => {
-  const [text, setText] = useState('');
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
-  // const [errors, setErrors] = useState(0);
+const UserInput: FC = () => {
+  const [userInput, setUserInput] = useState('');
 
-  const [greenLetters, setGreenLetters] = useState<number[]>([]);
-  const [redLetters, setRedLetters] = useState<number[]>([]);
+  // const [started, setStarted] = useState(false);
+  // const [finished, setFinished] = useState(false);
+  // const [finishedWords, setFinishedWords] = useState<string[]>([]);
 
-  const paragraph = 'This is a simple';
+  const rawParagraph =
+    'dairy wife corpse leftovers moral leader tactic Europe leash brain impress stab architecture plastic effect solo spite bathtub jewel zero';
 
-  const splittedParagraph = paragraph.split('');
-  const splittedText = text.split('');
-
-  const splittedParagraphInWords = paragraph.split(' ');
-  const splittedTextInWords = paragraph.split(' ');
-
-  const currentTextLetter = text.split('').slice(-1).join('');
-  const textLetterIndex = splittedText.length - 1;
-
-  const textRef = useRef(text);
-  textRef.current = text;
-
-  const errors = redLetters.length;
+  const arrayOfWords = rawParagraph.split('');
 
   useEffect(() => {
-    if (splittedParagraph[textLetterIndex] === currentTextLetter) {
-      setGreenLetters([...greenLetters, textLetterIndex]);
-    } else {
-      setGreenLetters(
-        greenLetters.filter((letter) => letter !== textLetterIndex)
-      );
+    window.addEventListener('keydown', handleKeyDown);
+
+    // cleanup this component
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const skipKeys = ['Shift', 'Alt', 'Control'];
+
+    if (skipKeys.includes(e.key)) return;
+
+    if (e.key === 'Backspace') {
+      setUserInput((prevUserInput) => prevUserInput.slice(0, -1));
+      return;
     }
 
-    if (text && splittedParagraph[textLetterIndex] !== currentTextLetter) {
-      setRedLetters([...redLetters, textLetterIndex]);
-    } else {
-      setRedLetters(redLetters.filter((letter) => letter !== textLetterIndex));
-    }
-  }, [text]);
-
-  const handleStart = () => {
-    setStarted(true);
-    setTimeout(handleResult, TIMER);
+    setUserInput((prevUserInput) => prevUserInput.concat(e.key));
   };
 
-  const handleResult = () => {
-    setFinished(true);
-    setText(textRef.current);
-  };
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setText(value);
-  };
-
-  const letterCount = text.trim().split(' ').join('').length;
+  const letterCount = userInput.trim().length;
 
   const netWpm = (
     letterCount /
@@ -69,60 +47,64 @@ const UserInput: React.FC = () => {
     TIME_IN_MINUTES
   ).toFixed();
 
-  // console.log(splittedParagraphInWords);
-  // console.log(splittedTextInWords);
-
   return (
-    <div className="max-w-lg">
-      <div>
-        {splittedParagraph.map((letter, idx) => {
-          let letterStyle = greenLetters.includes(idx)
-            ? 'text-green-400'
-            : redLetters.includes(idx)
-            ? 'text-red-500 bg-red-100'
-            : 'text-neutral-100';
+    <div className="max-w-[30rem] text-center">
+      <div className="text-2xl">
+        {arrayOfWords.map((letter, idx) => {
+          let letterStyle = 'relative tracking-wider ';
+
+          if (letter === userInput[idx]) {
+            letterStyle += 'text-blue-400';
+          }
+
+          if (
+            letter !== userInput[idx] &&
+            idx < userInput.length &&
+            letter !== ' '
+          ) {
+            letterStyle += 'underline text-red-400';
+          }
+
+          if (idx === userInput.length && letter !== ' ') {
+            return (
+              <span
+                className={`${letterStyle} animation underline-offset-2`}
+                key={idx}
+              >
+                {letter}
+                {/* <div className="absolute bottom-0 left-0 h-2 w-10 bg-red-200" /> */}
+              </span>
+            );
+          }
 
           return (
-            <span className={letterStyle} key={idx}>
+            <span className={`${letterStyle}`} key={idx}>
               {letter}
             </span>
           );
         })}
 
-        {!started && (
+        {/* {!started && (
           <div className="flex">
             <button
               className="mx-auto mt-10 rounded-md bg-blue-500 p-2"
-              onClick={handleStart}
+              // onClick={handleStart}
             >
               Click here to start!
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
-      {started && !finished && (
-        <div className="mt-10 flex">
-          <input
-            className="w-full rounded-md border-4 border-orange-500 bg-neutral-200 p-2 text-neutral-900 outline-none"
-            value={text}
-            onChange={handleChange}
-            // onKeyDown={handleKeyDown}
-            type="text"
-          />
-        </div>
-      )}
-      {finished && (
-        <div className="mt-10 text-center">
-          <p>
-            Your average typing speed was{' '}
-            <span className="text-green-500">{netWpm}</span> words per minute.
-          </p>
-          <p>
-            You made <span className="text-red-500">{errors}</span> errors.
-          </p>
-        </div>
-      )}
+      <div className="mt-10 text-center">
+        <p>
+          Your average typing speed was{' '}
+          <span className="text-blue-400">{netWpm}</span> words per minute.
+        </p>
+        {/* <p>
+          You made <span className="text-red-500">{errors}</span> errors.
+        </p> */}
+      </div>
     </div>
   );
 };
