@@ -72,7 +72,6 @@ const UserInput: FC = () => {
                 key={idx}
               >
                 {letter}
-                {/* <div className="absolute bottom-0 left-0 h-2 w-10 bg-red-200" /> */}
               </span>
             );
           }
