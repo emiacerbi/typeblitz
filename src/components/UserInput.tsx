@@ -1,44 +1,45 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 const TIME_IN_SECONDS = 1000;
-const TIMER = 10 * TIME_IN_SECONDS;
+const TIMER = 20 * TIME_IN_SECONDS;
 const TIME_IN_MINUTES = TIMER / 1000 / 60;
 const AVERAGE_WORD_LENGTH = 5;
 
-const UserInput: React.FC = () => {
-  const [text, setText] = useState('');
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
-  const [errors, setErrors] = useState(0);
+const UserInput: FC = () => {
+  const [userInput, setUserInput] = useState('');
 
-  const paragraph =
-    'This is a simple paragraph that is meant to be nice and easy to type which is why there will be commas no periods or any capital letters';
-  const textRef = useRef(text);
-  textRef.current = text;
+  // const [started, setStarted] = useState(false);
+  // const [finished, setFinished] = useState(false);
+  // const [finishedWords, setFinishedWords] = useState<string[]>([]);
 
-  const handleStart = () => {
-    setStarted(true);
-    setTimeout(handleResult, TIMER);
+  const rawParagraph =
+    'dairy wife corpse leftovers moral leader tactic Europe leash brain impress stab architecture plastic effect solo spite bathtub jewel zero';
+
+  const arrayOfWords = rawParagraph.split('');
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+
+    // cleanup this component
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const skipKeys = ['Shift', 'Alt', 'Control'];
+
+    if (skipKeys.includes(e.key)) return;
+
+    if (e.key === 'Backspace') {
+      setUserInput((prevUserInput) => prevUserInput.slice(0, -1));
+      return;
+    }
+
+    setUserInput((prevUserInput) => prevUserInput.concat(e.key));
   };
 
-  const handleResult = () => {
-    setFinished(true);
-    setText(textRef.current);
-  };
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setText(value);
-  };
-
-  // const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-  //   console.log(text);
-  //   // if (event.key === ' ') console.log('space pressed');
-  // };
-
-  const currentTextLetter = text.split('').slice(-1).join('');
-
-  const letterCount = text.trim().split(' ').join('').length;
+  const letterCount = userInput.trim().length;
 
   const netWpm = (
     letterCount /
@@ -46,63 +47,63 @@ const UserInput: React.FC = () => {
     TIME_IN_MINUTES
   ).toFixed();
 
-  console.log('Pipeline test number two');
-
   return (
-    <div className="max-w-lg">
-      <div className="">
-        {paragraph.split('').map((letter, idx) => {
-          let letterClass;
+    <div className="max-w-[30rem] text-center">
+      <div className="text-2xl">
+        {arrayOfWords.map((letter, idx) => {
+          let letterStyle = 'relative tracking-wider ';
 
-          if (letter === currentTextLetter && idx === text.length - 1) {
-            letterClass = 'text-green-500';
-          } else if (letter !== currentTextLetter && idx === text.length - 1) {
-            letterClass = 'text-red-500';
-          } else {
-            letterClass = 'text-neutral-200';
+          if (letter === userInput[idx]) {
+            letterStyle += 'text-blue-400';
+          }
+
+          if (
+            letter !== userInput[idx] &&
+            idx < userInput.length &&
+            letter !== ' '
+          ) {
+            letterStyle += 'underline text-red-400';
+          }
+
+          if (idx === userInput.length && letter !== ' ') {
+            return (
+              <span
+                className={`${letterStyle} animation underline-offset-2`}
+                key={idx}
+              >
+                {letter}
+              </span>
+            );
           }
 
           return (
-            <span className={letterClass} key={idx}>
+            <span className={`${letterStyle}`} key={idx}>
               {letter}
             </span>
           );
         })}
 
-        {!started && (
+        {/* {!started && (
           <div className="flex">
             <button
               className="mx-auto mt-10 rounded-md bg-blue-500 p-2"
-              onClick={handleStart}
+              // onClick={handleStart}
             >
               Click here to start!
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
-      {started && !finished && (
-        <div className="mt-10 flex">
-          <input
-            className="w-full rounded-md border-4 border-orange-500 bg-neutral-200 p-2 text-neutral-900 outline-none"
-            value={text}
-            onChange={handleChange}
-            // onKeyDown={handleKeyDown}
-            type="text"
-          />
-        </div>
-      )}
-      {finished && (
-        <div className="mt-10 text-center">
-          <p>
-            Your average typing speed was{' '}
-            <span className="text-green-500">{netWpm}</span> words per minute.
-          </p>
-          <p>
-            You made <span className="text-red-500">{errors}</span> errors.
-          </p>
-        </div>
-      )}
+      <div className="mt-10 text-center">
+        <p>
+          Your average typing speed was{' '}
+          <span className="text-blue-400">{netWpm}</span> words per minute.
+        </p>
+        {/* <p>
+          You made <span className="text-red-500">{errors}</span> errors.
+        </p> */}
+      </div>
     </div>
   );
 };
