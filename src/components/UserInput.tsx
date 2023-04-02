@@ -1,4 +1,4 @@
-import { AVERAGE_WORD_LENGTH, TIME_IN_MINUTES } from '@/constants';
+import { AVERAGE_WORD_LENGTH, COUNT, TIME_IN_MINUTES } from '@/constants';
 import { useCountdown } from '@/hooks/useCountdown';
 import { getErrors } from '@/utils/getErrors';
 import { FC, useEffect, useRef, useState } from 'react';
@@ -9,7 +9,7 @@ type Props = {
 
 const UserInput: FC<Props> = ({ arrayOfWords }) => {
   const [userInput, setUserInput] = useState('');
-  const { count, startCounting, isCounting } = useCountdown(10);
+  const { count, startCounting, isCounting } = useCountdown(COUNT);
   const isCountingRef = useRef(isCounting);
   isCountingRef.current = isCounting;
 
@@ -24,6 +24,7 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
   }, []);
 
   const handleStart = () => {
+    setUserInput('');
     startCounting();
   };
 
@@ -56,7 +57,7 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
   const errors = getErrors(userInput, arrayOfWords);
 
   return (
-    <div className="flex w-full max-w-[50rem] flex-col gap-8 text-center">
+    <div className="load flex w-full max-w-[50rem] flex-col gap-8 text-center">
       <div className="text-4xl text-blue-400">{count}</div>
       {!isCounting && <p>Click Enter to start</p>}
 

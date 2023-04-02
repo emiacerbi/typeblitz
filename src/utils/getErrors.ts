@@ -1,6 +1,6 @@
 export const getErrors = (userInput: string, arrayOfWords: string[]) => {
   return userInput.split('').reduce((acc, el, idx) => {
-    if (el !== arrayOfWords[idx]) {
+    if (el !== arrayOfWords[idx] && arrayOfWords[idx] !== ' ') {
       acc++;
     }
 

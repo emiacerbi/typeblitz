@@ -6,26 +6,24 @@
   0% {
     text-decoration: underline;
   }
-
-  /* 100% {
-    text-decoration: none;
-  } */
 }
 
 .animation {
   animation: blinking steps(2) 1.5s infinite;
 }
 
-/* .capo {
-  position: relative;
-} */
+.load {
+  animation-duration: 0.5s;
+  animation-name: load-fade;
+  /* animation-delay: 0.25s; */
+  /* animation-fill-mode: backwards; */
+}
 
-/* .capo::before {
-  content: '';
-  position: absolute;
-  display: block;
-  width: 50%;
-  height: 3px;
-  background-color: red;
-  z-index: 10;
-} */
+@keyframes load-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

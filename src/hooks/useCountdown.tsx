@@ -5,6 +5,7 @@ const useCountdown = (time: number) => {
   const [isCounting, setIsCounting] = useState(false);
 
   const startCounting = () => {
+    setCount(time);
     setIsCounting(true);
   };
 
