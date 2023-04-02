@@ -50,3 +50,8 @@ export const WORDS = [
   'dirty',
   'arise',
 ];
+
+export const TIME_IN_SECONDS = 1000;
+export const TIMER = 30 * TIME_IN_SECONDS;
+export const TIME_IN_MINUTES = TIMER / 1000 / 60;
+export const AVERAGE_WORD_LENGTH = 5;

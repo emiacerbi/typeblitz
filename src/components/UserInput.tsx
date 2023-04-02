@@ -1,33 +1,39 @@
-import { FC, useEffect, useState } from 'react';
+import { AVERAGE_WORD_LENGTH, TIME_IN_MINUTES } from '@/constants';
+import { useCountdown } from '@/hooks/useCountdown';
+import { getErrors } from '@/utils/getErrors';
+import { FC, useEffect, useRef, useState } from 'react';
 
-const TIME_IN_SECONDS = 1000;
-const TIMER = 20 * TIME_IN_SECONDS;
-const TIME_IN_MINUTES = TIMER / 1000 / 60;
-const AVERAGE_WORD_LENGTH = 5;
+type Props = {
+  arrayOfWords: string[];
+};
 
-const UserInput: FC = () => {
+const UserInput: FC<Props> = ({ arrayOfWords }) => {
   const [userInput, setUserInput] = useState('');
-
-  // const [started, setStarted] = useState(false);
-  // const [finished, setFinished] = useState(false);
-  // const [finishedWords, setFinishedWords] = useState<string[]>([]);
-
-  const rawParagraph =
-    'dairy wife corpse leftovers moral leader tactic Europe leash brain impress stab architecture plastic effect solo spite bathtub jewel zero';
-
-  const arrayOfWords = rawParagraph.split('');
+  const { count, startCounting, isCounting } = useCountdown(10);
+  const isCountingRef = useRef(isCounting);
+  isCountingRef.current = isCounting;
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
 
-    // cleanup this component
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleStart = () => {
+    startCounting();
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
-    const skipKeys = ['Shift', 'Alt', 'Control'];
+    if (e.key === 'Enter') {
+      handleStart();
+    }
+
+    if (!isCountingRef.current) return;
+    const skipKeys = ['Enter', 'Shift', 'Alt', 'Control', 'Escape'];
 
     if (skipKeys.includes(e.key)) return;
 
@@ -47,8 +53,13 @@ const UserInput: FC = () => {
     TIME_IN_MINUTES
   ).toFixed();
 
+  const errors = getErrors(userInput, arrayOfWords);
+
   return (
-    <div className="max-w-[30rem] text-center">
+    <div className="flex w-full max-w-[50rem] flex-col gap-8 text-center">
+      <div className="text-4xl text-blue-400">{count}</div>
+      {!isCounting && <p>Click Enter to start</p>}
+
       <div className="text-2xl">
         {arrayOfWords.map((letter, idx) => {
           let letterStyle = 'relative tracking-wider ';
@@ -68,7 +79,10 @@ const UserInput: FC = () => {
           if (idx === userInput.length && letter !== ' ') {
             return (
               <span
-                className={`${letterStyle} animation underline-offset-2`}
+                className={`${letterStyle} ${
+                  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                  isCountingRef.current && `animation underline-offset-2`
+                } `}
                 key={idx}
               >
                 {letter}
@@ -82,17 +96,6 @@ const UserInput: FC = () => {
             </span>
           );
         })}
-
-        {/* {!started && (
-          <div className="flex">
-            <button
-              className="mx-auto mt-10 rounded-md bg-blue-500 p-2"
-              // onClick={handleStart}
-            >
-              Click here to start!
-            </button>
-          </div>
-        )} */}
       </div>
 
       <div className="mt-10 text-center">
@@ -100,9 +103,9 @@ const UserInput: FC = () => {
           Your average typing speed was{' '}
           <span className="text-blue-400">{netWpm}</span> words per minute.
         </p>
-        {/* <p>
+        <p>
           You made <span className="text-red-500">{errors}</span> errors.
-        </p> */}
+        </p>
       </div>
     </div>
   );
