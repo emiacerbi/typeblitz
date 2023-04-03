@@ -1,12 +1,17 @@
+import Header from '@/components/Header';
 import UserInput from '@/components/UserInput';
 import { WORDS } from '@/constants';
+import { Session } from '@/types';
 import { shuffledArray } from '@/utils/shuffleArray';
-import { InferGetStaticPropsType } from 'next';
+import { PrismaClient } from '@prisma/client';
+import { InferGetServerSidePropsType, NextPageContext } from 'next';
+import { getSession } from 'next-auth/react';
 import Head from 'next/head';
 
 export default function Home({
   arrayOfWords,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+  user,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <>
       <Head>
@@ -15,18 +20,40 @@ export default function Home({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="grid min-h-screen place-content-center bg-neutral-900 text-neutral-100">
-        <UserInput arrayOfWords={arrayOfWords} />
-      </main>
+
+      <div className="flex min-h-screen flex-col">
+        <Header user={user} />
+
+        <main className="grid flex-1 place-content-center bg-neutral-900 text-neutral-100">
+          <UserInput arrayOfWords={arrayOfWords} />
+        </main>
+      </div>
     </>
   );
 }
 
-export const getStaticProps = () => {
+export const getServerSideProps = async (context: NextPageContext) => {
   const rawParagraph = shuffledArray(WORDS);
-  const arrayOfWords = rawParagraph.slice(0, 20).join(' ').split('');
+  const arrayOfWords = rawParagraph.slice(0, 30).join(' ').split('');
+  const session = (await getSession(context)) as Session;
 
-  return {
-    props: { arrayOfWords },
-  };
+  let user;
+
+  try {
+    const prisma = new PrismaClient();
+    user = await prisma.user.findFirst({
+      where: { email: session.user?.email },
+    });
+
+    await prisma.$disconnect();
+
+    return {
+      props: { arrayOfWords, user },
+    };
+  } catch (error) {
+    user = null;
+    return {
+      props: { arrayOfWords, user },
+    };
+  }
 };

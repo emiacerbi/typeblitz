@@ -1,7 +1,7 @@
+import { FC, useEffect, useRef, useState } from 'react';
 import { AVERAGE_WORD_LENGTH, COUNT, TIME_IN_MINUTES } from '@/constants';
 import { useCountdown } from '@/hooks/useCountdown';
 import { getErrors } from '@/utils/getErrors';
-import { FC, useEffect, useRef, useState } from 'react';
 
 type Props = {
   arrayOfWords: string[];
@@ -47,6 +47,8 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
   };
 
   const letterCount = userInput.trim().length;
+  const errors = getErrors(userInput, arrayOfWords);
+  const correctKeys = letterCount - errors;
 
   const netWpm = (
     letterCount /
@@ -54,19 +56,34 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
     TIME_IN_MINUTES
   ).toFixed();
 
-  const errors = getErrors(userInput, arrayOfWords);
+  const accuracy = (correctKeys / letterCount) * 100;
 
   return (
-    <div className="load flex w-full max-w-[50rem] flex-col gap-8 text-center">
-      <div className="text-4xl text-blue-400">{count}</div>
-      {!isCounting && <p>Click Enter to start</p>}
+    <div className="load flex w-full max-w-[50rem] flex-col">
+      <div className="flex items-end gap-4">
+        <div className="text-center text-4xl text-primary">{count}</div>
 
-      <div className="text-2xl">
+        {count === 0 ||
+          (isCounting && userInput.length > 0 && (
+            <>
+              <p className="ml-auto">
+                WPM
+                <span className="text-green-400"> {netWpm}</span>
+              </p>
+              <p>
+                Accuracy
+                <span className="text-orange-400"> {accuracy.toFixed()}%</span>
+              </p>
+            </>
+          ))}
+      </div>
+
+      <div className={`text-justify text-2xl`}>
         {arrayOfWords.map((letter, idx) => {
           let letterStyle = 'relative tracking-wider ';
 
           if (letter === userInput[idx]) {
-            letterStyle += 'text-blue-400';
+            letterStyle += 'text-primary';
           }
 
           if (
@@ -99,15 +116,15 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
         })}
       </div>
 
-      <div className="mt-10 text-center">
-        <p>
-          Your average typing speed was{' '}
-          <span className="text-blue-400">{netWpm}</span> words per minute.
-        </p>
-        <p>
-          You made <span className="text-red-500">{errors}</span> errors.
-        </p>
-      </div>
+      {!isCounting ? (
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2">
+          Press enter to start
+        </div>
+      ) : (
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2">
+          Press enter to restart
+        </div>
+      )}
     </div>
   );
 };

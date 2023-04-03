@@ -51,6 +51,6 @@ export const WORDS = [
   'arise',
 ];
 
-export const COUNT = 10;
+export const COUNT = 20;
 export const AVERAGE_WORD_LENGTH = 5;
 export const TIME_IN_MINUTES = COUNT / 60;
