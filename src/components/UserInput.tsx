@@ -1,33 +1,44 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
+import { AVERAGE_WORD_LENGTH, COUNT, TIME_IN_MINUTES } from '@/constants';
+import { useCountdown } from '@/hooks/useCountdown';
+import { getErrors } from '@/utils/getErrors';
+import { User } from '@prisma/client';
 
-const TIME_IN_SECONDS = 1000;
-const TIMER = 20 * TIME_IN_SECONDS;
-const TIME_IN_MINUTES = TIMER / 1000 / 60;
-const AVERAGE_WORD_LENGTH = 5;
+type Props = {
+  arrayOfWords: string[];
+  user: User | null;
+};
 
-const UserInput: FC = () => {
+const UserInput: FC<Props> = ({ arrayOfWords, user }) => {
   const [userInput, setUserInput] = useState('');
+  const { count, startCounting, isCounting } = useCountdown(COUNT);
+  const isCountingRef = useRef(isCounting);
+  isCountingRef.current = isCounting;
 
-  // const [started, setStarted] = useState(false);
-  // const [finished, setFinished] = useState(false);
-  // const [finishedWords, setFinishedWords] = useState<string[]>([]);
-
-  const rawParagraph =
-    'dairy wife corpse leftovers moral leader tactic Europe leash brain impress stab architecture plastic effect solo spite bathtub jewel zero';
-
-  const arrayOfWords = rawParagraph.split('');
+  const currentLetterRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
 
-    // cleanup this component
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleStart = () => {
+    setUserInput('');
+    startCounting();
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
-    const skipKeys = ['Shift', 'Alt', 'Control'];
+    if (e.key === 'Enter') {
+      handleStart();
+    }
+
+    if (!isCountingRef.current) return;
+    const skipKeys = ['Enter', 'Shift', 'Alt', 'Control', 'Escape'];
 
     if (skipKeys.includes(e.key)) return;
 
@@ -40,6 +51,8 @@ const UserInput: FC = () => {
   };
 
   const letterCount = userInput.trim().length;
+  const errors = getErrors(userInput, arrayOfWords);
+  const correctKeys = letterCount - errors;
 
   const netWpm = (
     letterCount /
@@ -47,14 +60,33 @@ const UserInput: FC = () => {
     TIME_IN_MINUTES
   ).toFixed();
 
+  const accuracy = ((correctKeys / letterCount) * 100).toFixed();
+
   return (
-    <div className="max-w-[30rem] text-center">
-      <div className="text-2xl">
+    <div className="load flex w-full max-w-screen-xl flex-col">
+      <div className="flex items-end gap-4">
+        <div className="text-center text-4xl text-primary">{count}</div>
+
+        {count === 0 && (
+          <>
+            <p className="ml-auto">
+              WPM:
+              <span className="text-green-400"> {netWpm}</span>
+            </p>
+            <p>
+              Accuracy:
+              <span className="text-orange-400"> {accuracy}%</span>
+            </p>
+          </>
+        )}
+      </div>
+
+      <div className={`max-h-32 max-w-prose overflow-hidden text-2xl`}>
         {arrayOfWords.map((letter, idx) => {
-          let letterStyle = 'relative tracking-wider ';
+          let letterStyle = 'tracking-wider';
 
           if (letter === userInput[idx]) {
-            letterStyle += 'text-blue-400';
+            letterStyle += ' text-primary';
           }
 
           if (
@@ -62,18 +94,26 @@ const UserInput: FC = () => {
             idx < userInput.length &&
             letter !== ' '
           ) {
-            letterStyle += 'underline text-red-400';
+            letterStyle += ' underline text-red-400';
           }
 
-          if (idx === userInput.length && letter !== ' ') {
-            return (
-              <span
-                className={`${letterStyle} animation underline-offset-2`}
-                key={idx}
-              >
-                {letter}
-              </span>
-            );
+          if (idx === userInput.length) {
+            currentLetterRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+            if (letter !== ' ') {
+              return (
+                <span
+                  className={`${letterStyle} ${
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    isCountingRef.current && `animation underline-offset-2`
+                  } `}
+                  key={idx}
+                  ref={currentLetterRef}
+                >
+                  {letter}
+                </span>
+              );
+            }
           }
 
           return (
@@ -82,28 +122,17 @@ const UserInput: FC = () => {
             </span>
           );
         })}
-
-        {/* {!started && (
-          <div className="flex">
-            <button
-              className="mx-auto mt-10 rounded-md bg-blue-500 p-2"
-              // onClick={handleStart}
-            >
-              Click here to start!
-            </button>
-          </div>
-        )} */}
       </div>
 
-      <div className="mt-10 text-center">
-        <p>
-          Your average typing speed was{' '}
-          <span className="text-blue-400">{netWpm}</span> words per minute.
-        </p>
-        {/* <p>
-          You made <span className="text-red-500">{errors}</span> errors.
-        </p> */}
-      </div>
+      {!isCounting ? (
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2">
+          Press enter to start
+        </div>
+      ) : (
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2">
+          Press enter to restart
+        </div>
+      )}
     </div>
   );
 };
