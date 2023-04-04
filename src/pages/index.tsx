@@ -25,7 +25,7 @@ export default function Home({
         <Header user={user} />
 
         <main className="grid flex-1 place-content-center bg-neutral-900 text-neutral-100">
-          <UserInput arrayOfWords={arrayOfWords} />
+          <UserInput user={user} arrayOfWords={arrayOfWords} />
         </main>
       </div>
     </>
@@ -34,7 +34,7 @@ export default function Home({
 
 export const getServerSideProps = async (context: NextPageContext) => {
   const rawParagraph = shuffledArray(WORDS);
-  const arrayOfWords = rawParagraph.slice(0, 30).join(' ').split('');
+  const arrayOfWords = rawParagraph.slice(0, 40).join(' ').split('');
   const session = (await getSession(context)) as Session;
 
   let user;

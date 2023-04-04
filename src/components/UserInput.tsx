@@ -2,16 +2,20 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { AVERAGE_WORD_LENGTH, COUNT, TIME_IN_MINUTES } from '@/constants';
 import { useCountdown } from '@/hooks/useCountdown';
 import { getErrors } from '@/utils/getErrors';
+import { User } from '@prisma/client';
 
 type Props = {
   arrayOfWords: string[];
+  user: User | null;
 };
 
-const UserInput: FC<Props> = ({ arrayOfWords }) => {
+const UserInput: FC<Props> = ({ arrayOfWords, user }) => {
   const [userInput, setUserInput] = useState('');
   const { count, startCounting, isCounting } = useCountdown(COUNT);
   const isCountingRef = useRef(isCounting);
   isCountingRef.current = isCounting;
+
+  const currentLetterRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -56,34 +60,33 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
     TIME_IN_MINUTES
   ).toFixed();
 
-  const accuracy = (correctKeys / letterCount) * 100;
+  const accuracy = ((correctKeys / letterCount) * 100).toFixed();
 
   return (
-    <div className="load flex w-full max-w-[50rem] flex-col">
+    <div className="load flex w-full max-w-screen-xl flex-col">
       <div className="flex items-end gap-4">
         <div className="text-center text-4xl text-primary">{count}</div>
 
-        {count === 0 ||
-          (isCounting && userInput.length > 0 && (
-            <>
-              <p className="ml-auto">
-                WPM
-                <span className="text-green-400"> {netWpm}</span>
-              </p>
-              <p>
-                Accuracy
-                <span className="text-orange-400"> {accuracy.toFixed()}%</span>
-              </p>
-            </>
-          ))}
+        {count === 0 && (
+          <>
+            <p className="ml-auto">
+              WPM:
+              <span className="text-green-400"> {netWpm}</span>
+            </p>
+            <p>
+              Accuracy:
+              <span className="text-orange-400"> {accuracy}%</span>
+            </p>
+          </>
+        )}
       </div>
 
-      <div className={`text-justify text-2xl`}>
+      <div className={`max-h-32 max-w-prose overflow-hidden text-2xl`}>
         {arrayOfWords.map((letter, idx) => {
-          let letterStyle = 'relative tracking-wider ';
+          let letterStyle = 'tracking-wider';
 
           if (letter === userInput[idx]) {
-            letterStyle += 'text-primary';
+            letterStyle += ' text-primary';
           }
 
           if (
@@ -91,21 +94,26 @@ const UserInput: FC<Props> = ({ arrayOfWords }) => {
             idx < userInput.length &&
             letter !== ' '
           ) {
-            letterStyle += 'underline text-red-400';
+            letterStyle += ' underline text-red-400';
           }
 
-          if (idx === userInput.length && letter !== ' ') {
-            return (
-              <span
-                className={`${letterStyle} ${
-                  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                  isCountingRef.current && `animation underline-offset-2`
-                } `}
-                key={idx}
-              >
-                {letter}
-              </span>
-            );
+          if (idx === userInput.length) {
+            currentLetterRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+            if (letter !== ' ') {
+              return (
+                <span
+                  className={`${letterStyle} ${
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    isCountingRef.current && `animation underline-offset-2`
+                  } `}
+                  key={idx}
+                  ref={currentLetterRef}
+                >
+                  {letter}
+                </span>
+              );
+            }
           }
 
           return (
