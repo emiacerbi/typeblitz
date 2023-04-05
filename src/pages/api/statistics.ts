@@ -2,8 +2,6 @@ import { StatisticWithoutId } from '@/types';
 import { PrismaClient } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-const prisma = new PrismaClient();
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -15,6 +13,8 @@ export default async function handler(
 }
 
 const createStatistic = async (req: NextApiRequest, res: NextApiResponse) => {
+  const prisma = new PrismaClient();
+
   try {
     const newEntry = newStatisticEntry(req.body);
     const response = await prisma.statistic.create({
