@@ -16,5 +16,7 @@ export default async function handler(
 const getUsers = async (req: NextApiRequest, res: NextApiResponse) => {
   const response = await prisma.user.findMany();
 
+  await prisma.$disconnect();
+
   return res.status(200).send(response);
 };

@@ -46,6 +46,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  Statistic     Statistic[]
 }
 
 model VerificationToken {
@@ -56,3 +57,9 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Statistic {
+  id     String  @id @default(cuid())
+  wpm    String
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
