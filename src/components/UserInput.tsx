@@ -3,6 +3,7 @@ import { AVERAGE_WORD_LENGTH, COUNT, TIME_IN_MINUTES } from '@/constants';
 import { useCountdown } from '@/hooks/useCountdown';
 import { getErrors } from '@/utils/getErrors';
 import { User } from '@prisma/client';
+import { statisticService } from '@/services/statistics';
 
 type Props = {
   arrayOfWords: string[];
@@ -50,6 +51,16 @@ const UserInput: FC<Props> = ({ arrayOfWords, user }) => {
     setUserInput((prevUserInput) => prevUserInput.concat(e.key));
   };
 
+  const handleSaveStats = async () => {
+    console.log('Alo?');
+    const response = await statisticService.create({
+      userId: 'clg2v5b9o0002w2s4j839jpux',
+      wpm: netWpm,
+    });
+
+    console.log(response);
+  };
+
   const letterCount = userInput.trim().length;
   const errors = getErrors(userInput, arrayOfWords);
   const correctKeys = letterCount - errors;
@@ -77,6 +88,12 @@ const UserInput: FC<Props> = ({ arrayOfWords, user }) => {
               Accuracy:
               <span className="text-orange-400"> {accuracy}%</span>
             </p>
+            <button
+              onClick={() => void handleSaveStats()}
+              className="bg-neutral-800"
+            >
+              Save result
+            </button>
           </>
         )}
       </div>
