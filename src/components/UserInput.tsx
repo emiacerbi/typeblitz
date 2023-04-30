@@ -115,7 +115,7 @@ const UserInput: FC<Props> = ({ arrayOfWords, user }) => {
           }
 
           if (idx === userInput.length) {
-            currentLetterRef.current?.scrollIntoView({ behavior: 'smooth' });
+            currentLetterRef.current?.scrollIntoView();
 
             if (letter !== ' ') {
               return (
